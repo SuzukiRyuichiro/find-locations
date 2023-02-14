@@ -18,7 +18,7 @@
 <body>
   <div style="display: flex;">
     <form onsubmit="run(event)" action="" method="get">
-      <input type="text" onchange="run">
+      <input type="text" onchange="run" id="addresses">
       <button>show</button>
     </form>
     <span>
@@ -26,51 +26,76 @@
   </div>
   <script>
     const addresses = [
-      "CASTELLDEFELS, PLAÇA DE L`ESPERANTO, 4",
-      "CORNELLA DE LLOBREGAT, AV. SANT ILDEFONS, S/N",
-      "IGUALADA, PRAT DE LA RIBA, 13",
-      "MANRESA, SOLER I MARCH, 5",
-      "MONTCADA I REIXAC, MAJOR, 38",
-      "SABADELL, BATLLEVELL, 115",
-      "VILAFRANCA DEL PENEDES, Avinguda Ronda del Mar, 109",
-      "VILANOVA I LA GELTRU ODE, VAPOR, 19"
+      "CNP COMISARIA CASTELLDEFELS, PLAÇA DE L`ESPERANTO, 4",
+      "CNP COMISARIA CORNELLA DE LLOBREGAT, AV. SANT ILDEFONS, S/N",
+      "CNP COMISARIA IGUALADA, PRAT DE LA RIBA, 13",
+      "CNP COMISARIA MANRESA, SOLER I MARCH, 5",
+      "CNP COMISARIA MONTCADA I REIXAC, MAJOR, 38",
+      "CNP COMISARIA SABADELL, BATLLEVELL, 115",
+      "CNP COMISARIA VILAFRANCA DEL PENEDES, Avinguda Ronda del Mar, 109",
+      "CNP COMISARIA VILANOVA I LA GELTRU ODE, VAPOR, 19"
     ]
+    const markers = []
+    let map;
 
-    mapboxgl.accessToken =
-      'pk.eyJ1Ijoic2Nvb3Rlci1zY29vdGVyIiwiYSI6ImNra3J2Z2ozZTBmNDczMXA2MzVvdXdrOHkifQ.RiTFrooZyY_30oinadpaxw';
-    var map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v11',
-      center: [2.181950, 41.444680], // starting position [lng, lat]
-      zoom: 10, // starting zoom
-    });
 
-    const addMarker = (cord, add, query) => {
-      const marker = new mapboxgl.Marker().setLngLat(cord).setPopup(new mapboxgl.Popup().setHTML(`<strong>${add}}</strong>
+    const makeMap = () => {
+      mapboxgl.accessToken =
+        'pk.eyJ1Ijoic2Nvb3Rlci1zY29vdGVyIiwiYSI6ImNra3J2Z2ozZTBmNDczMXA2MzVvdXdrOHkifQ.RiTFrooZyY_30oinadpaxw';
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [2.181950, 41.444680], // starting position [lng, lat]
+        zoom: 10, // starting zoom
+      });
+    }
+
+    const addMarker = (cord, address, query) => {
+      const marker = new mapboxgl.Marker().setLngLat(cord).setPopup(new mapboxgl.Popup().setHTML(`<strong>${address}}</strong>
       <p>${query}</p>`))
         .addTo(map)
+      markers.push(marker)
     }
 
-    const bbox = "0.82,40.7,2.65,42"
-    addresses.forEach(address => {
-      fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?bbox=${bbox}&country=ES&access_token=pk.eyJ1Ijoic2Nvb3Rlci1zY29vdGVyIiwiYSI6ImNra3J2Z2ozZTBmNDczMXA2MzVvdXdrOHkifQ.RiTFrooZyY_30oinadpaxw`
-        )
-        .then(res => res.json())
-        .then(data => {
-          console.log(data);
-          const {
-            center,
-            place_name
-          } = data.features[0]
-          addMarker(center, place_name, address)
-        })
-    })
+    const addMarkers = () => {
+      const bbox = "0.82,40.7,2.65,42"
+      addresses.forEach(address => {
+        fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?bbox=${bbox}&country=ES&access_token=pk.eyJ1Ijoic2Nvb3Rlci1zY29vdGVyIiwiYSI6ImNra3J2Z2ozZTBmNDczMXA2MzVvdXdrOHkifQ.RiTFrooZyY_30oinadpaxw`
+          )
+          .then(res => res.json())
+          .then(data => {
+            console.log(data);
+            const {
+              center,
+              place_name
+            } = data.features[0]
+            addMarker(center, place_name, address)
+          })
+      })
+    }
 
     const run = event => {
-      event.preventDefault;
-      console.log('hello');
+      event.preventDefault();
+
+      const inputField = document.getElementById("addresses")
+      const addressesArray = eval(inputField.value)
+
+      if (!Array.isArray(addressesArray)) {
+        console.log(addressesArray);
+        alert('input format is not correct. Make sure you have all the square brackets and commas!!')
+        return;
+      }
+
+      markers.forEach(marker => {
+        marker.remove()
+      })
     }
+  </script>
+
+  <script>
+    makeMap()
+    addMarkers()
   </script>
 
 </body>
