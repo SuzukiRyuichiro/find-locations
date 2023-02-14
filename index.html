@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./stylesheet.css">
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js">
+  </script>
+  <link rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+</head>
+
+<body>
+  <div style="display: flex;">
+    <form onsubmit="run(event)" action="" method="get">
+      <input type="text" onchange="run">
+      <button>show</button>
+    </form>
+    <span>
+      <- here</span> </div> <div id='map' style='width: 100%; height: 95%;'>
+  </div>
+  <script>
+    const addresses = [
+      "CASTELLDEFELS, PLAÇA DE L`ESPERANTO, 4",
+      "CORNELLA DE LLOBREGAT, AV. SANT ILDEFONS, S/N",
+      "IGUALADA, PRAT DE LA RIBA, 13",
+      "MANRESA, SOLER I MARCH, 5",
+      "MONTCADA I REIXAC, MAJOR, 38",
+      "SABADELL, BATLLEVELL, 115",
+      "VILAFRANCA DEL PENEDES, Avinguda Ronda del Mar, 109",
+      "VILANOVA I LA GELTRU ODE, VAPOR, 19"
+    ]
+
+    mapboxgl.accessToken =
+      'pk.eyJ1Ijoic2Nvb3Rlci1zY29vdGVyIiwiYSI6ImNra3J2Z2ozZTBmNDczMXA2MzVvdXdrOHkifQ.RiTFrooZyY_30oinadpaxw';
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: [2.181950, 41.444680], // starting position [lng, lat]
+      zoom: 10, // starting zoom
+    });
+
+    const addMarker = (cord, add, query) => {
+      const marker = new mapboxgl.Marker().setLngLat(cord).setPopup(new mapboxgl.Popup().setHTML(`<strong>${add}}</strong>
+      <p>${query}</p>`))
+        .addTo(map)
+    }
+
+    const bbox = "0.82,40.7,2.65,42"
+    addresses.forEach(address => {
+      fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?bbox=${bbox}&country=ES&access_token=pk.eyJ1Ijoic2Nvb3Rlci1zY29vdGVyIiwiYSI6ImNra3J2Z2ozZTBmNDczMXA2MzVvdXdrOHkifQ.RiTFrooZyY_30oinadpaxw`
+        )
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          const {
+            center,
+            place_name
+          } = data.features[0]
+          addMarker(center, place_name, address)
+        })
+    })
+
+    const run = event => {
+      event.preventDefault;
+      console.log('hello');
+    }
+  </script>
+
+</body>
+
+</html>
